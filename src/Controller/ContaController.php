@@ -5,20 +5,19 @@ namespace App\Controller;
 use App\DataTransformer\ContaDescricaoInputTransformer;
 use App\DataTransformer\ContaInputTransformer;
 use App\DataTransformer\ContaOutputTransformer;
-use App\DataTransformer\ExtratoOutputTransformer;
 use App\DTO\ContasDTO;
 use App\Entity\Conta;
 use App\Entity\Pessoa;
 use App\Form\ContaType;
 use App\Repository\ContaRepository;
 use App\Utils\ContaUtil;
-use App\Utils\CpfUtils;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 #[Route('/api/conta')]
 class ContaController extends BaseController
@@ -32,11 +31,12 @@ class ContaController extends BaseController
     {
     }
 
-    #[Route('/all/{pessoaId}', name:'get_all', methods: ['GET'])]
-    public function getAllAction(int $pessoaId)
+    #[Route('/all', name:'get_all', methods: ['GET'])]
+    public function getAllAction()
     {
         try {
-            $pessoa = $this->entityManager->getRepository(Pessoa::class)->find($pessoaId);
+            $pessoaId = $this->getUser();
+            $pessoa = $this->entityManager->getRepository(Pessoa::class)->find($pessoaId->getId());
             if (!$pessoa){
                 throw new \Exception('Pessoa Não Existe');
             }
@@ -47,12 +47,13 @@ class ContaController extends BaseController
             );
         }catch (\Exception $e){
             return new JsonResponse(
-                $this->serializer->serialize( $e->getMessage(),'json',[DateTimeNormalizer::FORMAT_KEY => 'Y-m-d H:i:s']),
+                $this->serializer->serialize( $e->getMessage(),'json'),
                 Response::HTTP_NOT_FOUND,
                 json:true
             );
         }
     }
+
     #[Route('/{conta}', name: 'get_conta',methods: ['GET'])]
     public function getAction(
         string $conta,
@@ -192,37 +193,4 @@ class ContaController extends BaseController
             true
         );
     }
-
-
-    #[Route('/conta/{conta}/extrato', name: 'extrato_conta', methods: ['GET'])]
-    public function getExtrato(
-        string $conta,
-        ExtratoOutputTransformer $extratoOutputTransformer
-    ) :JsonResponse
-    {
-        try {
-            $contaResult = $this->contasRepository->findOneBy(['conta'=> $conta]);
-            if ($contaResult) {
-                return new JsonResponse(
-                    $this->serializer->serialize( $extratoOutputTransformer->transform($contaResult),'json'),
-                    Response::HTTP_OK,
-                    json:true
-                );
-            }
-
-            return new JsonResponse(
-                $this->serializer->serialize( 'Nenhum Registro foi encontrado','json'),
-                Response::HTTP_OK,
-                json:true
-            );
-
-        } catch (\Exception $e) {
-            return new JsonResponse(
-                $this->serializer->serialize( "Não Foi possivel buscar Extrato, Detalhe: ".$e->getMessage(),'json'),
-                Response::HTTP_NOT_FOUND,
-                json:true
-            );
-        }
-    }
-
 }

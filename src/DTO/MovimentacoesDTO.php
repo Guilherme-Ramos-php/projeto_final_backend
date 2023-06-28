@@ -20,5 +20,7 @@ class MovimentacoesDTO
     #[Assert\NotBlank]
     public float $valor;
 
-    public DateTimeInterface $dataMovimentacao;
+    public string $dataMovimentacao;
+
+    public float $saldo;
 }

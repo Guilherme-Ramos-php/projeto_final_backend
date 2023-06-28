@@ -21,7 +21,7 @@ class Conta
     private ?string $conta = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Serializer\Type("DateTimeInterface<'d/m/yy H:i' >")]
+    #[Serializer\Type("DateTimeInterface<'d/m/yyyy H:i' >")]
     private ?\DateTimeInterface $dataCriacao = null;
 
     #[Serializer\Exclude]

@@ -21,7 +21,7 @@ class Movimentacao
     private ?Conta $conta = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Serializer\Type("DateTimeInterface<'d/m/yy H:i' >")]
+    #[Serializer\Type("DateTimeInterface<'d/m/yyyy H:i'>")]
     private ?\DateTimeInterface $dataMovimentacao = null;
 
     #[ORM\Column(length: 9)]
